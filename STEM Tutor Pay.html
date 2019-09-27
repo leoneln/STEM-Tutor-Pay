@@ -1,19 +1,31 @@
-<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
-  integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
-  integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
-  integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
-  integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<!doctype html>
+
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Stem Tutor Pay App</title>
+  <!--Top section is calling some libraries for javascript and css -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+    integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+    integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+    integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+    integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+</head>
+<body>
+<!--This is just some style of the buttons -->
 <style>
   .btn-sm {
     width: 50%
   }
 </style>
 <script>
-  document.write('<form id="form"><div class="row m-4">' +
+  //Fist write the frame of the document. Notice the he IDs of each div and the form. 
+  document.write('<div class="container-fluid"><form id="form"><div class="row m-4">' +
     '<div class="col-4 text-center">' +
     '<p>1. Select CLRA Certificaton Number</p>' +
     '<div id="step1" class="btn-group-toggle" data-toggle="buttons"></div>' +
@@ -28,16 +40,14 @@
     '</div>' +
     '</div></form>' +
     '<div class="row">' +
-    '<div class="col-6 px-5 text-center">' +
-    '<h3>Minimum Pay</h3><br /><p class="lead">$<span id="min"></span></p>' +
-    '</div>' +
-    '<div class="col-6 px-5 text-center">' +
-    '<h3>Maximum Pay</h3><br /><p class="lead">$<span id="max"></span></p>' +
-    '</div>' +
-    '</div>'
+    '<div class="col-6 px-5 text-center"><h3>Minimum Pay</h3><br /><p id="min"></p></div>' +
+    '<div class="col-6 px-5 text-center"><h3>Minimum Pay</h3><br /><p id="max"></p></div>' +
+    '</div></div>'
   );
+  //Declare urls that will be used. 
   var dataURL = "https://apex.oracle.com/pls/apex/leonelrest/stempay/all";
   var colsURL = "https://apex.oracle.com/pls/apex/leonelrest/stempay/d/";
+  //First for step 1, fetch to get the buttons names and render them with the for loop
   fetch(colsURL + 1).then(function (response) {
     return response.json();
   }).then(function (j) {
@@ -50,6 +60,7 @@
         + '</label><br />';
     }
   });
+  //Fetch Step 2
   fetch(colsURL + 2).then(function (response) {
     return response.json();
   }).then(function (j) {
@@ -62,6 +73,7 @@
         + '</label><br />';
     }
   });
+  //Fetch step 3
   fetch(colsURL + 3).then(function (response) {
     return response.json();
   }).then(function (j) {
@@ -74,6 +86,7 @@
         + '</label><br />';
     }
   });
+  //Create a function that will be called onChange. Notice the on change property on each input type above. 
   function fetchPayRate() {
     let x = document.getElementById('form');
     let radOn = new Array;
@@ -82,9 +95,11 @@
         radOn.push(x.elements[i].id);
       }
     }
+    //declare paramets that will be used in fetch... Notice that this is ternary conditional declaration
     let crla = radOn[0] === undefined ? 1 : radOn[0];
     let degree = radOn[1] === undefined ? 1 : radOn[1];
     let years = radOn[2] === undefined ? 1 : radOn[2];
+    //Construct URL and then fecth.. The fetch will write to spans with the min and max ids. 
     let payUrl = "https://apex.oracle.com/pls/apex/leonelrest/stempay/raterange/" + crla + "/" + degree + "/" + years;
     fetch(payUrl).then(function (response) {
       return response.json();
@@ -97,3 +112,5 @@
     })
   }
 </script>
+</body>
+</html>
