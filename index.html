@@ -44,6 +44,23 @@
       }
       return JSON.stringify(result);
     }
+    function WriteButtons(data) {
+      var step = "step1";
+      var element = document.getElementById(step);
+      for (var i = 0; i < data.length; i++) {
+        if (i >= 5) {
+          step = "step2";
+          element = document.getElementById(step);
+        }
+        if (i >= 8) {
+          step = "step3";
+          element = document.getElementById(step);
+        }
+        element.innerHTML += '<label class="btn btn-secondary btn-sm m-2">'
+          + '<input type="radio" id="' + data[i].Value + '" name="' + step + '" class="btn btn-secondary" onchange="fetchPayRate()">' + data[i].Value
+          + '</label><br />';
+      }
+    }
     //Fist write the frame of the document. Notice the he IDs of each div and the form. 
     document.write('<div class="container-fluid"><form id="form"><div class="row m-4">' +
       '<div class="col-4 text-center">' +
@@ -60,34 +77,22 @@
       '</div>' +
       '</div></form>' +
       '<div class="row">' +
-      '<div class="col-6 px-5 text-center"><h3>Minimum Pay</h3><br /><p id="min"></p></div>' +
-      '<div class="col-6 px-5 text-center"><h3>Maximum Pay</h3><br /><p id="max"></p></div>' +
+      '<div class="col-4 px-5 text-center"><h3>Minimum Pay</h3><br /><p id="min"></p></div>' +
+      '<div class="col-4 px-5 text-center"><h3 id="middlelabel"></h3><br /><p id="middle"></p></div>' +
+      '<div class="col-4 px-5 text-center"><h3>Maximum Pay</h3><br /><p id="max"></p></div>' +
       '</div></div>'
     );
     //Declare urls that will be used. 
     var gsheet = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQwlUFekIfqsyJoZHBo-uRMkWK7AR1L5iq59UrRslAN9ExoYhcZJH36pn2aCMYtJd-YwuhtnEXhIPfT/pub?";
     var catsSheet = 'gid=594044715&single=true&output=csv'; //Sheet with categories for buttons
     var paySheet = 'gid=1471362448&single=true&output=csv'; //Sheet with pay combinations
+    let sortedSheet = 'gid=91226759&single=true&output=csv';//Sheet with sorters
     //First for step 1, fetch to get the buttons names and render them with the for loop
     fetch(gsheet + catsSheet).then(function (response) {
       return response.text();
     }).then(function (data) {
       var data = JSON.parse(csvJSON(data));
-      var step = "step1";
-      var element = document.getElementById(step);
-      for (var i = 0; i < data.length; i++) {
-        if (i >= 5) {
-          step = "step2";
-          element = document.getElementById(step);
-        }
-        if (i >= 8) {
-          step = "step3";
-          element = document.getElementById(step);
-        }
-        element.innerHTML += '<label class="btn btn-secondary btn-sm m-2">'
-          + '<input type="radio" id="' + data[i].Value + '" name="' + step + '" class="btn btn-secondary" onchange="fetchPayRate()">' + data[i].Value
-          + '</label><br />';
-      }
+      WriteButtons(data);
     });
     //Create a function that will be called onChange. Notice the on change property on each input type above. 
     function fetchPayRate() {
@@ -107,15 +112,31 @@
       fetch(gsheet + paySheet).then(function (response) {
         return response.text();
       }).then(function (data) {
-        var payRate = JSON.parse(csvJSON(data));
+        var payData = JSON.parse(csvJSON(data));
         console.log(crla, degree, years);
-        var test = payRate.filter(val => { return val.Crla === crla });
+        payData = payData.filter(val => { return val.Crla === crla });
         if (degree !== 1) {
-          test = test.filter(val => { return val.Degree === degree });
+          payData = payData.filter(val => { return val.Degree === degree });
         }
-        console.log(test);
-        //document.getElementById("min").innerHTML = minMax[0].min;
-        //document.getElementById("max").innerHTML = minMax[0].max;
+        if (years !== 1) {
+          payData = payData.filter(val => { return val.Years === years });
+        }
+        //If we add this function here it will concatanate to existing buttons. 
+        //we need to find a way to reset the inner html and re-write them on change.
+        //WriteButtons(payData);
+        console.log(payData);
+        let max = payData.length - 1;
+        if (payData[0]["PayRate"] === payData[max]["PayRate"]) {
+          document.getElementById("min").style.display = 'none';
+          document.getElementById("max").style.display = 'none';
+          document.getElementById("middle").innerHTML = payData[0]["PayRate"];
+          document.getElementById("middlelabel").innerHTML = "Pay";
+        } else {
+          document.getElementById("min").innerHTML = payData[0]["PayRate"];
+          document.getElementById("max").innerHTML = payData[max]["PayRate"];
+          document.getElementById("middlelabel").style.display = 'none';
+          document.getElementById("none").style.display = 'none';
+        }
       })
     }
   </script>
