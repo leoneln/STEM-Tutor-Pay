@@ -59,7 +59,7 @@
           step = "step3";
           element = document.getElementById(step);
         }
-        element.innerHTML += '<label class="btn btn-secondary btn-sm m-2">'
+        element.innerHTML += '<label class="btn btn-secondary btn-sm m-2" id="'+data[i].Value+'">'
           + '<input type="radio" id="' + data[i].Value + '" name="' + step + '" class="btn btn-secondary" onchange="fetchPayRate()">' + data[i].Value
           + '</label><br />';
       }
@@ -106,13 +106,15 @@
       let radOn = new Array;
       for (let i = 0; i < x.length; i++) {
         if (x.elements[i].checked === true) {
-          radOn.push(x.elements[i].id);
+          //radOn.push(x.elements[i].id);
+          let stepGroup = x.elements[i].name;
+          radOn[stepGroup]=x.elements[i].id;
         }
       }
       //declare paramets that will be used in fetch... Notice that this is ternary conditional declaration
-      let crla = radOn[0] === undefined ? 1 : radOn[0];
-      let degree = radOn[1] === undefined ? 1 : radOn[1];
-      let years = radOn[2] === undefined ? 1 : radOn[2];
+      let crla = radOn["step1"] === undefined ? 1 : radOn["step1"];
+      let degree = radOn["step2"] === undefined ? 1 : radOn["step2"];
+      let years = radOn["step3"] === undefined ? 1 : radOn["step3"];
       //Construct URL and then fecth.. The fetch will write to spans with the min and max ids. 
       //let payUrl = "https://apex.oracle.com/pls/apex/leonelrest/stempay/raterange/" + crla + "/" + degree + "/" + years;
       fetch(gsheet + paySheet).then(function (response) {
@@ -127,7 +129,7 @@
         if (years !== 1) {
           payData = payData.filter(val => { return val.Years === years });
         }     
-        console.log(payData);
+        //console.log(payData);
         let max = payData.length - 1;
         if (payData[0]["PayRate"] === payData[max]["PayRate"]) {
           document.getElementById("middle").innerHTML = payData[0]["PayRate"];
@@ -142,7 +144,61 @@
           document.getElementById("label").childNodes[1].classList.add("label");
         }
         //Cascase Hide Categories
-        
+        //Cascase Hide Categories
+        let tarDoc = document.getElementById("step3").children;
+        let tarDocTwo = document.getElementById("step2").children;
+        switch (crla) {
+          case "None":
+          case "II":
+            //console.log(tarDoc);
+            for (var e = 0; e < tarDoc.length; e+=2) {
+              var elementName = tarDoc[e].id;
+              //console.log(tarDoc[e]);
+              if (elementName !== 'Y ≥ 0') {
+                tarDoc[e].classList.add("label");
+              }else tarDoc[e].classList.remove("label");
+            }
+            //Reset Elements
+            for (var i = 0; i < tarDocTwo.length; i+=2) {
+              var elementName = tarDocTwo[i].id;
+              tarDocTwo[i].classList.remove("label");
+            }
+            break;
+          case "I":
+            //console.log(tarDoc);
+            for (var e = 0; e < tarDoc.length; e+=2) {
+              var elementName = tarDoc[e].id;
+              //console.log(tarDoc[e]);
+              if (elementName === 'Y ≥ 2' || elementName === 'Y ≥ 0') {
+                tarDoc[e].classList.add("label");
+              } else tarDoc[e].classList.remove("label");
+            }
+            //Reset Elements
+            for (var i = 0; i < tarDocTwo.length; i+=2) {
+              var elementName = tarDocTwo[i].id;
+              tarDocTwo[i].classList.remove("label");
+            }
+            break;
+          case "III":
+            //console.log(tarDoc);
+            for (var e = 0; e < tarDoc.length; e+=2) {
+              var elementName = tarDoc[e].id;
+              //console.log(tarDoc[e]);
+              if (elementName === '4 ≥ Y < 6' || elementName === 'Y ≥ 0') {
+                tarDoc[e].classList.add("label");
+              }else tarDoc[e].classList.remove("label");
+            }
+            for (var i = 0; i < tarDocTwo.length; i+=2) {
+              var elementName = tarDocTwo[i].id;
+              //console.log(tarDoc[e]);
+              if (elementName === 'In Progress') {
+                tarDocTwo[i].classList.add("label");
+              } else {
+                tarDocTwo[i].classList.remove("label");
+              }
+            }
+            break;
+        }
       })
     }
   </script>
