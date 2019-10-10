@@ -31,6 +31,13 @@ function WriteButtons(data) {
       + '</label><br />';
   }
 }
+function buttonCreator(data, step, element) {
+  for (var i = 0; i < data.length; i++) {
+    element.innerHTML += '<label class="btn btn-secondary btn-sm m-2" id="' + data[i].Value + '">'
+      + '<input type="radio" id="' + data[i] + '" name="' + step + '" class="btn btn-secondary" onchange="fetchPayRate()">' + data[i]
+      + '</label><br />';
+  }
+}
 //Declare urls that will be used. 
 let gsheet = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQwlUFekIfqsyJoZHBo-uRMkWK7AR1L5iq59UrRslAN9ExoYhcZJH36pn2aCMYtJd-YwuhtnEXhIPfT/pub?";
 let sortedSheet = 'gid=91226759&single=true&output=csv';//Sheet with sorters
@@ -46,13 +53,19 @@ fetch(gsheet + sortedSheet).then(function (response) {
   for (var a = 0; a < data.length; a++) {
     crla.push(data[a].Crla);
   }
+  data = data.sort(function (a, b) {
+    return a.Degree_Sort - b.Degree_Sort;
+  })
+  let degBtns = [];
+  for (var e = 0; e < data.length; e++) {
+    degBtns.push(data[e].Degree);
+  }
+  degBtns = [...new Set(degBtns.map(x => x))];
   crla = [...new Set(crla.map(x => x))];
   var element = document.getElementById("step1");
-  for (var i = 0; i < crla.length; i++) {
-    element.innerHTML += '<label class="btn btn-secondary btn-sm m-2" id="' + crla[i].Value + '">'
-      + '<input type="radio" id="' + crla[i] + '" name="step1" class="btn btn-secondary" onchange="fetchPayRate()">' + crla[i]
-      + '</label><br />';
-  }
+  buttonCreator(crla, "step1", element);
+  element = document.getElementById("step2");
+  buttonCreator(degBtns, "step2", element);
 });
 //Create a function that will be called onChange. Notice the on change property on each input type above. 
 function fetchPayRate() {
@@ -75,30 +88,13 @@ function fetchPayRate() {
     return response.text();
   }).then(function (data) {
     var payData = JSON.parse(csvJSON(data));
-    console.log(crla, degree, years);
+    //console.log(crla, degree, years);
     payData = payData.filter(val => { return val.Crla === crla });
     if (degree !== 1) {
       payData = payData.filter(val => { return val.Degree === degree });
     }
     if (years !== 1) {
       payData = payData.filter(val => { return val.Years === years });
-    }
-    console.log(payData);
-    //Write Step 2
-    let step2 = payData.sort(function (a, b) {
-      return a.Degree_Sort - b.Degree_Sort;
-    });
-    let degreeButtons = [];
-    for (var b = 0; b < step2.length; b++) {
-      degreeButtons.push(step2[b].Degree);
-    }
-    degreeButtons = [...new Set(degreeButtons.map(x => x))];
-    var element = document.getElementById("step2");
-    element.innerHTML = '';
-    for (var i = 0; i < degreeButtons.length; i++) {
-      element.innerHTML += '<label class="btn btn-secondary btn-sm m-2" id="' + degreeButtons[i].Value + '">'
-        + '<input type="radio" id="' + degreeButtons[i] + '" name="step2" class="btn btn-secondary" onchange="fetchPayRate()">' + degreeButtons[i]
-        + '</label><br />';
     }
     //Write Step 3
     let step3 = payData.sort(function (a, b) {
@@ -111,12 +107,7 @@ function fetchPayRate() {
     yearsButtons = [...new Set(yearsButtons.map(x => x))];
     var step3El = document.getElementById("step3");
     step3El.innerHTML = '';
-    for (var d = 0; d < yearsButtons.length; d++) {
-      step3El.innerHTML += '<label class="btn btn-secondary btn-sm m-2" id="' + yearsButtons[d].Value + '">'
-        + '<input type="radio" id="' + yearsButtons[d] + '" name="step3" class="btn btn-secondary" onchange="fetchPayRate()">' + yearsButtons[d]
-        + '</label><br />';
-    }
-
+    buttonCreator(yearsButtons, "step3", step3El);
     let max = payData.length - 1;
     let amnts = new Array();
     for (var z = 0; z < payData.length; z++) {
@@ -124,7 +115,8 @@ function fetchPayRate() {
     }
     let maxPay = Math.max.apply(null, amnts);
     let minPay = Math.min.apply(null, amnts);
-    console.log(payData);
+    //console.log(payData);
+    //Write on to document
     if (maxPay === minPay) {
       document.getElementById("middle").innerHTML = '$' + payData[0]["PayRate"];
       document.getElementById("label").children[1].classList.remove("label");
@@ -136,6 +128,11 @@ function fetchPayRate() {
       document.getElementById("label").children[0].classList.remove("label");
       document.getElementById("label").children[2].classList.remove("label");
       document.getElementById("label").children[1].classList.add("label");
+    }
+    //Remove "In Progress" from step 2
+    if (crla === "III") {
+      document.getElementById("step2").children[0].classList.add("label");
+      document.getElementById("cert3").classList.remove("label");
     }
   })
 }

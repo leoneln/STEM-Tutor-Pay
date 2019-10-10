@@ -1,6 +1,11 @@
 .btn-sm {
   width: 50%
 }
+@media (max-width: 800px) {
+  .btn-sm {
+    width: 80%;
+  }
+}
 .label {
   display: none;
 }

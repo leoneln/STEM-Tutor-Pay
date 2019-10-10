@@ -1,0 +1,218 @@
+<!doctype html>
+
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Stem Tutor Pay App</title>
+  <!--Top section is calling some libraries for javascript and css -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+    integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+    integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+    crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+    integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+    crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+    integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+    crossorigin="anonymous"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+</head>
+
+<body>
+  <!--This is just some style of the buttons -->
+  <style>
+    .btn-sm {
+      width: 50%
+    }
+
+    .label {
+      display: none;
+    }
+  </style>
+  <script>
+    //Function to JSONize csv
+    function csvJSON(csv) {
+      var lines = csv.split("\r\n");
+      var result = [];
+      var headers = lines[0].split(",");
+      for (var i = 1; i < lines.length; i++) {
+        var obj = {};
+        var currentline = lines[i].split(",");
+        for (var j = 0; j < headers.length; j++) {
+          obj[headers[j]] = currentline[j];
+        }
+        result.push(obj);
+      }
+      return JSON.stringify(result);
+    }
+    function WriteButtons(data) {
+      var step = "step1";
+      var element = document.getElementById(step);
+      let className = '';
+      for (var i = 0; i < data.length; i++) {
+        if (i >= 4) {
+          step = "step2";
+          element = document.getElementById(step);
+          className = 'label';
+        }
+        if (i >= 7) {
+          step = "step3";
+          element = document.getElementById(step);
+          className = 'label';
+        }
+        element.innerHTML += '<label class="btn btn-secondary btn-sm m-2 ' + className + '" id="' + data[i].Value + '">'
+          + '<input type="radio" id="' + data[i].Value + '" name="' + step + '" class="btn btn-secondary" onchange="fetchPayRate()">' + data[i].Value
+          + '</label><br />';
+      }
+    }
+    function ClearInnerHTML(id) {
+      document.getElementById(id).innerHTML = '';
+    }
+    //Fist write the frame of the document. Notice the he IDs of each div and the form. 
+    document.write('<div class="container-fluid"><form id="form"><div class="row m-4">' +
+      '<div class="col-4 text-center">' +
+      '<p>1. Select CLRA Certificaton Number</p>' +
+      '<div id="step1" class="btn-group-toggle" data-toggle="buttons"></div>' +
+      '</div>' +
+      '<div class="col-4 text-center">' +
+      '<p>2. Select Degree Level</p>' +
+      '<div id="step2" class="btn-group-toggle" data-toggle="buttons"></div>' +
+      '</div>' +
+      '<div class="col-4 text-center">' +
+      '<p>3. Select Years of Experience</p>' +
+      '<div id="step3" class="btn-group-toggle" data-toggle="buttons"></div>' +
+      '</div>' +
+      '</div></form>' +
+      '<div class="row text-center" id="label">' +
+      '<div class="col-4 px-5 text-center mx-auto label"><h3>Minimum Pay</h3><br /><p id="min"></p></div>' +
+      '<div class="col-4 px-5 text-center mx-auto label"><h3>Pay</h3><br /><p id="middle"></p></div>' +
+      '<div class="col-4 px-5 text-center mx-auto label"><h3>Maximum Pay</h3><br /><p id="max"></p></div>' +
+      '</div>' +
+      '</div>'
+    );
+    //Declare urls that will be used. 
+    var gsheet = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQwlUFekIfqsyJoZHBo-uRMkWK7AR1L5iq59UrRslAN9ExoYhcZJH36pn2aCMYtJd-YwuhtnEXhIPfT/pub?";
+    var catsSheet = 'gid=594044715&single=true&output=csv'; //Sheet with categories for buttons
+    var paySheet = 'gid=1471362448&single=true&output=csv'; //Sheet with pay combinations
+    let sortedSheet = 'gid=91226759&single=true&output=csv';//Sheet with sorters
+    //First for step 1, fetch to get the buttons names and render them with the for loop
+    fetch(gsheet + catsSheet).then(function (response) {
+      return response.text();
+    }).then(function (data) {
+      var data = JSON.parse(csvJSON(data));
+      WriteButtons(data);
+    });
+    //Create a function that will be called onChange. Notice the on change property on each input type above. 
+    function fetchPayRate() {
+      let x = document.getElementById('form');
+      let radOn = new Array;
+      for (let i = 0; i < x.length; i++) {
+        if (x.elements[i].checked === true) {
+          //radOn.push(x.elements[i].id);
+          let stepGroup = x.elements[i].name;
+          radOn[stepGroup] = x.elements[i].id;
+        }
+      }
+      //declare paramets that will be used in fetch... Notice that this is ternary conditional declaration
+      let crla = radOn["step1"] === undefined ? 1 : radOn["step1"];
+      let degree = radOn["step2"] === undefined ? 1 : radOn["step2"];
+      let years = radOn["step3"] === undefined ? 1 : radOn["step3"];
+      //Construct URL and then fecth.. The fetch will write to spans with the min and max ids. 
+      //let payUrl = "https://apex.oracle.com/pls/apex/leonelrest/stempay/raterange/" + crla + "/" + degree + "/" + years;
+      fetch(gsheet + paySheet).then(function (response) {
+        return response.text();
+      }).then(function (data) {
+        var payData = JSON.parse(csvJSON(data));
+        console.log(crla, degree, years);
+        payData = payData.filter(val => { return val.Crla === crla });
+        if (degree !== 1) {
+          payData = payData.filter(val => { return val.Degree === degree });
+        }
+        if (years !== 1) {
+          payData = payData.filter(val => { return val.Years === years });
+        }
+        //console.log(payData);
+        let max = payData.length - 1;
+        let amnts = new Array();
+        for (var z = 0; z < payData.length; z++) {
+          amnts.push(parseFloat(payData[z]["PayRate"]));
+        }
+        let maxPay = Math.max.apply(null, amnts);
+        let minPay = Math.min.apply(null, amnts);
+        if (payData[0]["PayRate"] === payData[max]["PayRate"]) {
+          document.getElementById("middle").innerHTML = '$' + payData[0]["PayRate"];
+          document.getElementById("label").childNodes[1].classList.remove("label");
+          document.getElementById("label").childNodes[0].classList.add("label");
+          document.getElementById("label").childNodes[2].classList.add("label");
+        } else {
+          document.getElementById("min").innerHTML = '$' + minPay;
+          document.getElementById("max").innerHTML = '$' + maxPay;
+          document.getElementById("label").childNodes[0].classList.remove("label");
+          document.getElementById("label").childNodes[2].classList.remove("label");
+          document.getElementById("label").childNodes[1].classList.add("label");
+        }
+        //Cascase Hide Categories
+        //Cascase Hide Categories
+        let tarDoc = document.getElementById("step3").children;
+        let tarDocTwo = document.getElementById("step2").children;
+        switch (crla) {
+          case "None":
+          case "II":
+            //console.log(tarDoc);
+            for (var e = 0; e < tarDoc.length; e += 2) {
+              var elementName = tarDoc[e].id;
+              //console.log(tarDoc[e]);
+              if (elementName !== 'Y ≥ 0') {
+                tarDoc[e].classList.add("label");
+              } else tarDoc[e].classList.remove("label");
+            }
+            //Reset Elements
+            for (var i = 0; i < tarDocTwo.length; i += 2) {
+              var elementName = tarDocTwo[i].id;
+              tarDocTwo[i].classList.remove("label");
+            }
+            break;
+          case "I":
+            //console.log(tarDoc);
+            for (var e = 0; e < tarDoc.length; e += 2) {
+              var elementName = tarDoc[e].id;
+              //console.log(tarDoc[e]);
+              if (elementName === 'Y ≥ 2' || elementName === 'Y ≥ 0') {
+                tarDoc[e].classList.add("label");
+              } else tarDoc[e].classList.remove("label");
+            }
+            //Reset Elements
+            for (var i = 0; i < tarDocTwo.length; i += 2) {
+              var elementName = tarDocTwo[i].id;
+              tarDocTwo[i].classList.remove("label");
+            }
+            break;
+          case "III":
+            //console.log(tarDoc);
+            for (var e = 0; e < tarDoc.length; e += 2) {
+              var elementName = tarDoc[e].id;
+              //console.log(tarDoc[e]);
+              if (elementName === '4 ≥ Y < 6' || elementName === 'Y ≥ 0') {
+                tarDoc[e].classList.add("label");
+              } else tarDoc[e].classList.remove("label");
+            }
+            for (var i = 0; i < tarDocTwo.length; i += 2) {
+              var elementName = tarDocTwo[i].id;
+              //console.log(tarDoc[e]);
+              if (elementName === 'In Progress') {
+                tarDocTwo[i].classList.add("label");
+              } else {
+                tarDocTwo[i].classList.remove("label");
+              }
+            }
+            break;
+        }
+      })
+    }
+  </script>
+</body>
+
+</html>

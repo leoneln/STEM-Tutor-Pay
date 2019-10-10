@@ -1,0 +1,27 @@
+<!doctype html>
+
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+
+  <title>STEM</title>
+  <meta name="description" content="The HTML5 Herald">
+  <meta name="author" content="SitePoint">
+</head>
+
+<body>
+  <p>I am an Iframe, Here is my content. I loaded on: <span id="demo"></span></p>
+  <iframe src="index.html" width="50%" height="700px">
+  </iframe>
+</body>
+<script>
+  function myFunction() {
+    var timeStampInMs = window.performance && window.performance.now && window.performance.timing && window.performance.timing.navigationStart ? window.performance.now() + window.performance.timing.navigationStart : Date.now();
+    document.getElementById("demo").innerHTML = timeStampInMs;
+  }
+  myFunction();
+
+</script>
+
+</html>
