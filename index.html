@@ -27,6 +27,7 @@
     .btn-sm {
       width: 50%
     }
+
     .label {
       display: none;
     }
@@ -50,16 +51,19 @@
     function WriteButtons(data) {
       var step = "step1";
       var element = document.getElementById(step);
+      let className = '';
       for (var i = 0; i < data.length; i++) {
         if (i >= 4) {
           step = "step2";
           element = document.getElementById(step);
+          className = 'label';
         }
         if (i >= 7) {
           step = "step3";
           element = document.getElementById(step);
+          className = 'label';
         }
-        element.innerHTML += '<label class="btn btn-secondary btn-sm m-2" id="'+data[i].Value+'">'
+        element.innerHTML += '<label class="btn btn-secondary btn-sm m-2 ' + className + '" id="' + data[i].Value + '">'
           + '<input type="radio" id="' + data[i].Value + '" name="' + step + '" class="btn btn-secondary" onchange="fetchPayRate()">' + data[i].Value
           + '</label><br />';
       }
@@ -86,7 +90,8 @@
       '<div class="col-4 px-5 text-center mx-auto label"><h3>Minimum Pay</h3><br /><p id="min"></p></div>' +
       '<div class="col-4 px-5 text-center mx-auto label"><h3>Pay</h3><br /><p id="middle"></p></div>' +
       '<div class="col-4 px-5 text-center mx-auto label"><h3>Maximum Pay</h3><br /><p id="max"></p></div>' +
-      '</div></div>'
+      '</div>' +
+      '</div>'
     );
     //Declare urls that will be used. 
     var gsheet = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQwlUFekIfqsyJoZHBo-uRMkWK7AR1L5iq59UrRslAN9ExoYhcZJH36pn2aCMYtJd-YwuhtnEXhIPfT/pub?";
@@ -108,7 +113,7 @@
         if (x.elements[i].checked === true) {
           //radOn.push(x.elements[i].id);
           let stepGroup = x.elements[i].name;
-          radOn[stepGroup]=x.elements[i].id;
+          radOn[stepGroup] = x.elements[i].id;
         }
       }
       //declare paramets that will be used in fetch... Notice that this is ternary conditional declaration
@@ -128,17 +133,23 @@
         }
         if (years !== 1) {
           payData = payData.filter(val => { return val.Years === years });
-        }     
+        }
         //console.log(payData);
         let max = payData.length - 1;
+        let amnts = new Array();
+        for (var z = 0; z < payData.length; z++) {
+          amnts.push(parseFloat(payData[z]["PayRate"]));
+        }
+        let maxPay = Math.max.apply(null, amnts);
+        let minPay = Math.min.apply(null, amnts);
         if (payData[0]["PayRate"] === payData[max]["PayRate"]) {
-          document.getElementById("middle").innerHTML = payData[0]["PayRate"];
+          document.getElementById("middle").innerHTML = '$' + payData[0]["PayRate"];
           document.getElementById("label").childNodes[1].classList.remove("label");
           document.getElementById("label").childNodes[0].classList.add("label");
           document.getElementById("label").childNodes[2].classList.add("label");
         } else {
-          document.getElementById("min").innerHTML = payData[0]["PayRate"];
-          document.getElementById("max").innerHTML = payData[max]["PayRate"];
+          document.getElementById("min").innerHTML = '$' + minPay;
+          document.getElementById("max").innerHTML = '$' + maxPay;
           document.getElementById("label").childNodes[0].classList.remove("label");
           document.getElementById("label").childNodes[2].classList.remove("label");
           document.getElementById("label").childNodes[1].classList.add("label");
@@ -151,22 +162,22 @@
           case "None":
           case "II":
             //console.log(tarDoc);
-            for (var e = 0; e < tarDoc.length; e+=2) {
+            for (var e = 0; e < tarDoc.length; e += 2) {
               var elementName = tarDoc[e].id;
               //console.log(tarDoc[e]);
               if (elementName !== 'Y ≥ 0') {
                 tarDoc[e].classList.add("label");
-              }else tarDoc[e].classList.remove("label");
+              } else tarDoc[e].classList.remove("label");
             }
             //Reset Elements
-            for (var i = 0; i < tarDocTwo.length; i+=2) {
+            for (var i = 0; i < tarDocTwo.length; i += 2) {
               var elementName = tarDocTwo[i].id;
               tarDocTwo[i].classList.remove("label");
             }
             break;
           case "I":
             //console.log(tarDoc);
-            for (var e = 0; e < tarDoc.length; e+=2) {
+            for (var e = 0; e < tarDoc.length; e += 2) {
               var elementName = tarDoc[e].id;
               //console.log(tarDoc[e]);
               if (elementName === 'Y ≥ 2' || elementName === 'Y ≥ 0') {
@@ -174,21 +185,21 @@
               } else tarDoc[e].classList.remove("label");
             }
             //Reset Elements
-            for (var i = 0; i < tarDocTwo.length; i+=2) {
+            for (var i = 0; i < tarDocTwo.length; i += 2) {
               var elementName = tarDocTwo[i].id;
               tarDocTwo[i].classList.remove("label");
             }
             break;
           case "III":
             //console.log(tarDoc);
-            for (var e = 0; e < tarDoc.length; e+=2) {
+            for (var e = 0; e < tarDoc.length; e += 2) {
               var elementName = tarDoc[e].id;
               //console.log(tarDoc[e]);
               if (elementName === '4 ≥ Y < 6' || elementName === 'Y ≥ 0') {
                 tarDoc[e].classList.add("label");
-              }else tarDoc[e].classList.remove("label");
+              } else tarDoc[e].classList.remove("label");
             }
-            for (var i = 0; i < tarDocTwo.length; i+=2) {
+            for (var i = 0; i < tarDocTwo.length; i += 2) {
               var elementName = tarDocTwo[i].id;
               //console.log(tarDoc[e]);
               if (elementName === 'In Progress') {
