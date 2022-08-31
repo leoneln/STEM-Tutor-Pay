@@ -1,0 +1,29 @@
+Crla,Cral_Sort,Degree,Degree_Sort,Years,Years_Sort,PayRate
+None,1,In Progress,1,Y ? 0,1,12.29
+None,1,A.S.,2,Y ? 0,1,12.59
+None,1,B.S. & Up,3,Y ? 0,1,13.38
+I,2,In Progress,1,Y < 2,2,13.38
+I,2,In Progress,1,2 ? Y < 4,3,13.76
+I,2,In Progress,1,4 ? Y < 6,4,14.71
+I,2,In Progress,1,Y ? 6,6,15.14
+I,2,A.S.,2,Y < 2,2,13.76
+I,2,A.S.,2,2 ? Y < 4,3,14.71
+I,2,A.S.,2,4 ? Y < 6,4,15.14
+I,2,A.S.,2,Y ? 6,6,15.56
+I,2,B.S. & Up,3,Y < 2,2,14.71
+I,2,B.S. & Up,3,2 ? Y < 4,3,15.14
+I,2,B.S. & Up,3,Y ? 4,5,15.56
+II,3,In Progress,1,Y < 2,2,13.76
+II,3,In Progress,1,2 ? Y < 4,3,14.71
+II,3,In Progress,1,4 ? Y < 6,4,15.14
+II,3,In Progress,1,Y ? 6,6,15.56
+II,3,A.S.,2,Y < 2,2,14.71
+II,3,A.S.,2,2 ? Y < 4,3,15.14
+II,3,A.S.,2,Y ? 4,5,15.56
+II,3,B.S. & Up,3,Y < 2,2,15.14
+II,3,B.S. & Up,3,Y ? 2,2,15.56
+III,4,A.S.,2,Y < 2,2,16.18
+III,4,A.S.,2,2 ? Y < 4,3,16.65
+III,4,A.S.,2,Y ? 4,5,17.11
+III,4,B.S. & Up,3,Y < 2,2,16.65
+III,4,B.S. & Up,3,Y ? 2,2,17.11

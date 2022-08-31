@@ -42,10 +42,11 @@ function buttonCreator(data, step, element) {
 let gsheet = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQwlUFekIfqsyJoZHBo-uRMkWK7AR1L5iq59UrRslAN9ExoYhcZJH36pn2aCMYtJd-YwuhtnEXhIPfT/pub?";
 let sortedSheet = 'gid=91226759&single=true&output=csv';//Sheet with sorters
 //First for step 1, fetch to get the buttons names and render them with the for loop
-fetch(gsheet + sortedSheet).then(function (response) {
+fetch("./pay_rate_data.csv").then(function (response) {
   return response.text();
 }).then(function (data) {
   var data = JSON.parse(csvJSON(data));
+  console.log(data)
   data = data.sort(function (a, b) {
     return a.Cral_Sort - b.Cral_Sort;
   });
@@ -84,7 +85,7 @@ function fetchPayRate() {
   let years = radOn["step3"] === undefined ? 1 : radOn["step3"];
   //Construct URL and then fecth.. The fetch will write to spans with the min and max ids. 
   //let payUrl = "https://apex.oracle.com/pls/apex/leonelrest/stempay/raterange/" + crla + "/" + degree + "/" + years;
-  fetch(gsheet + sortedSheet).then(function (response) {
+  fetch("./pay_rate_data.csv").then(function (response) {
     return response.text();
   }).then(function (data) {
     var payData = JSON.parse(csvJSON(data));
